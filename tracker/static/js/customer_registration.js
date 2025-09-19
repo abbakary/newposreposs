@@ -59,9 +59,31 @@
 
   function bindWizard(){
     var form = document.getElementById('customerRegistrationForm');
+    // Update progress UI helper
+    function updateProgress(){
+      var stepInput = document.getElementById('currentStep');
+      var displayEl = document.getElementById('currentStepDisplay');
+      var step = 1;
+      if(stepInput){ step = parseInt(stepInput.value || '1', 10); }
+      else if(displayEl){ step = parseInt(displayEl.textContent||'1',10); }
+      var total = 4;
+      var pct = Math.round((step/total)*100);
+      var bar = document.getElementById('registrationProgressBar');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', step); }
+      if(displayEl){ displayEl.textContent = step; }
+      var indicators = document.querySelectorAll('#registrationSteps .step-indicator');
+      indicators.forEach(function(el, idx){
+        var active = (idx+1) === step;
+        el.classList.toggle('bg-primary', active);
+        el.classList.toggle('bg-secondary', !active);
+      });
+    }
+
     if(!form) return;
     var stepInput = document.getElementById('currentStep');
     var step = parseInt(stepInput.value || '1', 10);
+    // Ensure progress updates on bind
+    updateProgress();
 
     // Next for step 1
     var nextBtn = document.getElementById('nextStepBtn');
