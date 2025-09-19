@@ -792,7 +792,15 @@ document.addEventListener('DOMContentLoaded', function() {
               .then(function(data){
                 if(data && data.html){
                   var container = document.getElementById('groupList');
-                  if(container){ container.innerHTML = data.html; }
+                  if(container){
+                    container.innerHTML = data.html;
+                    // Initialize DataTable if available
+                    try{
+                      if(window.jQuery && typeof jQuery().DataTable === 'function'){
+                        if($('#cgTable').length){ $('#cgTable').DataTable({ pageLength: 10, order: [[5,'desc']], responsive: true }); }
+                      }
+                    }catch(e){ console.error('DataTable init error', e); }
+                  }
                 }
               }).catch(function(err){ console.error('Failed to load group detail', err); });
           }catch(err){ console.error('Invalid URL', err); }
