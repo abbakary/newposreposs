@@ -3,6 +3,52 @@
 
 {% block title %}Orders{% endblock %}
 
+{% block extra_css %}
+<style>
+  /* Order Type Badges */
+  .badge-type-service { background-color: #4e73df; color: white; }
+  .badge-type-sales { background-color: #1cc88a; color: white; }
+  .badge-type-consultation { background-color: #36b9cc; color: white; }
+  
+  /* Status Badges */
+  .badge-status-created { background-color: #6c757d; color: white; }
+  .badge-status-assigned { background-color: #17a2b8; color: white; }
+  .badge-status-in_progress { background-color: #f6c23e; color: #212529; }
+  .badge-status-completed { background-color: #1cc88a; color: white; }
+  .badge-status-cancelled { background-color: #e74a3b; color: white; }
+  
+  /* Priority Badges */
+  .badge-priority-low { background-color: #6c757d; color: white; }
+  .badge-priority-medium { background-color: #f6c23e; color: #212529; }
+  .badge-priority-high { background-color: #e74a3b; color: white; }
+  .badge-priority-urgent { 
+    background-color: #e74a3b; 
+    color: white;
+    position: relative;
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(231, 74, 59, 0.7); }
+    70% { box-shadow: 0 0 0 5px rgba(231, 74, 59, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(231, 74, 59, 0); }
+  }
+  
+  .badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.35em 0.65em;
+    text-transform: capitalize;
+  }
+  
+  .badge-type, .badge-status, .badge-priority {
+    min-width: 90px;
+    display: inline-block;
+    text-align: center;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
   <div class="container-fluid">
     <div class="page-title">
@@ -88,9 +134,19 @@
                   <td class="text-nowrap"><a href="{% url 'tracker:order_detail' o.id %}">{{ o.order_number }}</a></td>
                   <td class="text-nowrap"><a href="{% url 'tracker:customer_detail' o.customer.id %}">{{ o.customer.full_name }}</a></td>
                   <td class="text-nowrap">{{ o.vehicle.plate_number|default:'-' }}</td>
-                  <td class="text-capitalize">{{ o.type }}</td>
-                  <td class="text-capitalize">{{ o.status }}</td>
-                  <td class="text-capitalize">{{ o.priority }}</td>
+                  <td class="text-nowrap">
+                    <span class="badge badge-type badge-type-{{ o.type|default:'other' }}">{{ o.type|default:'-' }}</span>
+                  </td>
+                  <td class="text-nowrap">
+                    <span class="badge badge-status badge-status-{{ o.status|default:'created' }}">
+                      {{ o.status|default:'Created'|title }}
+                    </span>
+                  </td>
+                  <td class="text-nowrap">
+                    <span class="badge badge-priority badge-priority-{{ o.priority|lower|default:'medium' }}">
+                      {{ o.priority|default:'Medium' }}
+                    </span>
+                  </td>
                   <td>
                     {{ o.created_at|localtime|date:'Y-m-d H:i' }}
                     <small class="text-muted d-block">{{ timezone }}</small>

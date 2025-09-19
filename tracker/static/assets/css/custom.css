@@ -1,3 +1,91 @@
+/* Sidebar Styling */
+.sidebar-wrapper {
+  background: #2f3c4e;
+  transition: all 0.3s ease;
+}
+
+.sidebar-wrapper .sidebar-main .sidebar-links {
+  padding: 10px 0;
+}
+
+.sidebar-wrapper .sidebar-main .sidebar-list {
+  position: relative;
+  padding: 0 15px;
+  margin: 5px 0;
+}
+
+.sidebar-wrapper .sidebar-main .sidebar-link {
+  color: #a5b8d1;
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.sidebar-wrapper .sidebar-main .sidebar-link:hover,
+.sidebar-wrapper .sidebar-main .sidebar-link.active {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.sidebar-wrapper .sidebar-main .sidebar-link i {
+  margin-right: 10px;
+  font-size: 16px;
+}
+
+.sidebar-wrapper .sidebar-main .sidebar-title {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.sidebar-wrapper .sidebar-main .sidebar-submenu {
+  padding-left: 20px;
+  margin-top: 5px;
+  display: none;
+}
+
+.sidebar-wrapper .sidebar-main .sidebar-list.active > .sidebar-submenu {
+  display: block;
+}
+
+.sidebar-wrapper .sidebar-main .sidebar-submenu .sidebar-link {
+  padding: 8px 15px 8px 35px;
+  font-size: 13px;
+}
+
+/* Active state for parent items with active children */
+.sidebar-wrapper .sidebar-main .sidebar-list.active > .sidebar-link {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-weight: 500;
+}
+
+/* Logo and toggle */
+.logo-wrapper {
+  padding: 15px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logo-wrapper img {
+  max-height: 40px;
+}
+
+.toggle-sidebar {
+  color: #a5b8d1;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.toggle-sidebar:hover {
+  color: #fff;
+}
+
 /* Progress Bar Styles */
 .dashboard-progress {
     height: 8px;
