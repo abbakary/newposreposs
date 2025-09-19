@@ -690,8 +690,8 @@ def customer_register(request: HttpRequest):
                 request.session.save()
                 
                 if is_ajax:
-                    return json_response(True, form=form)
-                    
+                    return json_response(True)
+
                 return redirect(f"{reverse('tracker:customer_register')}?step=2")
             else:
                 if is_ajax:
@@ -707,8 +707,8 @@ def customer_register(request: HttpRequest):
                 next_step = 4 if intent == "inquiry" else 3
                 
                 if is_ajax:
-                    return json_response(True, form=form)
-                    
+                    return json_response(True)
+
                 return redirect(f"{reverse('tracker:customer_register')}?step={next_step}")
             elif is_ajax:
                 return json_response(False, form=form)
@@ -720,8 +720,8 @@ def customer_register(request: HttpRequest):
                 request.session.save()
                 
                 if is_ajax:
-                    return json_response(True, form=form)
-                    
+                    return json_response(True)
+
                 return redirect(f"{reverse('tracker:customer_register')}?step=4")
             elif is_ajax:
                 return json_response(False, form=form)
