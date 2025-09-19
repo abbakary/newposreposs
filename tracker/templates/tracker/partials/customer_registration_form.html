@@ -191,93 +191,9 @@
             <div class="card-body">
               {{ order_form.type.label_tag }}
               {{ order_form.type }}
-              <div id="step4-order-sections" class="mt-3">
-                <div id="section-service" class="{% if order_form.initial.type and order_form.initial.type != 'service' %}d-none{% endif %}">
-                  <div class="mb-2">Select services</div>
-                  <div class="row g-2">
-                    {% for checkbox in order_form.service_selection %}
-                      <div class="col-md-6">
-                        <div class="form-check">
-                          {{ checkbox.tag }}
-                          <label class="form-check-label" for="{{ checkbox.id_for_label }}">{{ checkbox.choice_label }}</label>
-                        </div>
-                      </div>
-                    {% endfor %}
-                  </div>
-                </div>
 
-                <div id="section-sales" class="{% if order_form.initial.type and order_form.initial.type != 'sales' %}d-none{% endif %}">
-                  <div class="card border-warning mb-3">
-                    <div class="card-header bg-warning text-dark">
-                      <h6 class="mb-0"><i class="fa fa-list-check me-2"></i>Tire Service Add-ons</h6>
-                    </div>
-                    <div class="card-body">
-                      <div class="row g-3">
-                        <div class="col-md-3">
-                          <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="oc_ts_install" name="tire_services" value="install">
-                            <label class="form-check-label" for="oc_ts_install">Install Tires</label>
-                          </div>
-                        </div>
-                        <div class="col-md-3">
-                          <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="oc_ts_balance" name="tire_services" value="balancing">
-                            <label class="form-check-label" for="oc_ts_balance">Wheel Balancing</label>
-                          </div>
-                        </div>
-                        <div class="col-md-3">
-                          <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="oc_ts_align" name="tire_services" value="alignment">
-                            <label class="form-check-label" for="oc_ts_align">Wheel Alignment</label>
-                          </div>
-                        </div>
-                        <div class="col-md-3">
-                          <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="oc_ts_dispose" name="tire_services" value="disposal">
-                            <label class="form-check-label" for="oc_ts_dispose">Old Tire Disposal</label>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="row g-3">
-                    <div class="col-md-6">
-                      <label class="form-label">Item</label>
-                      {{ order_form.item_name }}
-                    </div>
-                    <div class="col-md-6">
-                      <label class="form-label">Brand</label>
-                      {{ order_form.brand }}
-                    </div>
-                    <div class="col-md-4">
-                      <label class="form-label">Quantity</label>
-                      {{ order_form.quantity }}
-                    </div>
-                    <div class="col-md-8">
-                      <label class="form-label">Tire type</label>
-                      {{ order_form.tire_type }}
-                    </div>
-                  </div>
-                </div>
+              {% include 'tracker/partials/order_form_sections.html' with form=order_form %}
 
-                <div id="section-consultation" class="{% if order_form.initial.type and order_form.initial.type != 'consultation' %}d-none{% endif %}">
-                  <div class="row g-3">
-                    <div class="col-md-6">
-                      <label class="form-label">Inquiry type</label>
-                      {{ order_form.inquiry_type }}
-                    </div>
-                    <div class="col-md-6">
-                      <label class="form-label">Contact preference</label>
-                      {{ order_form.contact_preference }}
-                    </div>
-                    <div class="col-md-12">
-                      <label class="form-label">Questions</label>
-                      {{ order_form.questions }}
-                    </div>
-                  </div>
-                </div>
-
-              </div>
 
             </div>
           </div>
