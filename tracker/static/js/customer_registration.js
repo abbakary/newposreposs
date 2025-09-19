@@ -132,4 +132,7 @@
 
   // Initialize on DOM ready
   document.addEventListener('DOMContentLoaded', function(){ bindWizard(); });
+
+  // Expose a flag so inline progressive enhancement knows AJAX is active
+  window.__CUSTOMER_REG_AJAX = true;
 })();
