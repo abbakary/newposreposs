@@ -7,6 +7,7 @@ from django.core.paginator import Paginator
 from django.db.models import Count, Avg, Q, Sum, Case, When, F, Value, DecimalField, ExpressionWrapper
 from django.db.models.functions import TruncDate, TruncDay, TruncMonth, Concat
 from django.utils import timezone
+from django.template.loader import render_to_string
 from django.contrib.auth.views import LoginView
 from .forms import ProfileForm, CustomerStep1Form, CustomerStep2Form, CustomerStep3Form, CustomerStep4Form, VehicleForm, OrderForm, CustomerEditForm, SystemSettingsForm, BrandForm
 from django.urls import reverse
