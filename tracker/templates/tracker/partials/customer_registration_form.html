@@ -272,9 +272,9 @@
       var ps = document.getElementById('personal-subtype-field');
       var org = document.getElementById('organization-field');
       var tax = document.getElementById('tax-field');
-      if(ps) ps.style.display = (val === 'personal')? 'block':'none';
-      if(org) org.style.display = (['company','government','ngo'].indexOf(val) !== -1)? 'block':'none';
-      if(tax) tax.style.display = (['company','government','ngo'].indexOf(val) !== -1)? 'block':'none';
+      if(ps) { ps.classList.toggle('d-none', val !== 'personal'); }
+      if(org) { org.classList.toggle('d-none', ['company','government','ngo'].indexOf(val) === -1); }
+      if(tax) { tax.classList.toggle('d-none', ['company','government','ngo'].indexOf(val) === -1); }
     }
     if(customerType){ customerType.addEventListener('change', toggleCustomerFields); toggleCustomerFields(); }
 
