@@ -1,354 +1,135 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize brand mapping from item name to brand
-    function initializeBrandMapping() {
-        const itemNameSelect = document.getElementById('id_item_name');
-        if (!itemNameSelect) return null;
-        
-        try {
-            const brandsData = itemNameSelect.getAttribute('data-brands');
-            return brandsData ? JSON.parse(brandsData) : {};
-        } catch (e) {
-            console.error('Error parsing brand mapping:', e);
-            return {};
+(function(){
+  // Helper to perform AJAX POST for wizard steps
+  function ajaxPostForm(form, onSuccess, onError){
+    var formData = new FormData(form);
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', window.location.href);
+    xhr.setRequestHeader('X-Requested-With','XMLHttpRequest');
+    xhr.onreadystatechange = function(){
+      if(xhr.readyState !== 4) return;
+      if(xhr.status >=200 && xhr.status < 300){
+        try{
+          var data = JSON.parse(xhr.responseText);
+        }catch(e){
+          if(onError) onError('Invalid server response');
+          return;
         }
-    }
-    
-    const brandMapping = initializeBrandMapping();
-    
-    // Update brand dropdown when item is selected
-    function setupBrandUpdate() {
-        const itemNameSelect = document.getElementById('id_item_name');
-        const brandSelect = document.getElementById('id_brand');
-        
-        if (!itemNameSelect || !brandSelect) return;
-        
-        itemNameSelect.addEventListener('change', function() {
-            const selectedItem = this.value;
-            const brandName = brandMapping[selectedItem];
-            
-            if (brandName) {
-                // Find and select the brand in the dropdown
-                for (let i = 0; i < brandSelect.options.length; i++) {
-                    if (brandSelect.options[i].text === brandName) {
-                        brandSelect.selectedIndex = i;
-                        break;
-                    }
-                }
-            }
-        });
-    }
-    
-    // Initialize brand update functionality
-    setupBrandUpdate();
-    
-    // Auto-format phone number
-    const phoneInput = document.querySelector('input[name="phone"]');
-    if (phoneInput) {
-        phoneInput.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 13) value = value.substring(0, 13);
-            e.target.value = value;
-        });
-    }
+        if(data.redirect_url){ window.location.href = data.redirect_url; return; }
+        if(onSuccess) onSuccess(data);
+      }else{
+        if(onError) onError('Server error');
+      }
+    };
+    xhr.send(formData);
+  }
 
-    // Customer type dynamic fields
-    const customerTypeSelect = document.querySelector('select[name="customer_type"]');
-    if (customerTypeSelect) {
-        function toggleCustomerTypeFields() {
-            const selectedType = customerTypeSelect.value;
-            
-            // Get conditional field elements
-            const organizationField = document.getElementById('organization-field');
-            const taxField = document.getElementById('tax-field');
-            const personalSubtypeField = document.getElementById('personal-subtype-field');
-            
-            // Hide all conditional fields first
-            [organizationField, taxField, personalSubtypeField].forEach(field => {
-                if (field) {
-                    field.style.display = 'none';
-                    // Remove required attribute from hidden fields
-                    const inputs = field.querySelectorAll('input, select, textarea');
-                    inputs.forEach(input => input.removeAttribute('required'));
-                }
-            });
-
-            // Show relevant fields based on customer type
-            if (selectedType === 'personal') {
-                // Show personal subtype field for personal customers
-                if (personalSubtypeField) {
-                    personalSubtypeField.style.display = 'block';
-                    const subtypeSelect = personalSubtypeField.querySelector('select');
-                    if (subtypeSelect) subtypeSelect.setAttribute('required', 'required');
-                }
-            } else if (['government', 'ngo', 'company'].includes(selectedType)) {
-                // Show organization and tax fields for organizational customers
-                if (organizationField) {
-                    organizationField.style.display = 'block';
-                    const orgInput = organizationField.querySelector('input');
-                    if (orgInput) orgInput.setAttribute('required', 'required');
-                }
-                if (taxField) {
-                    taxField.style.display = 'block';
-                    const taxInput = taxField.querySelector('input');
-                    if (taxInput) taxInput.setAttribute('required', 'required');
-                }
-            }
-            // For 'bodaboda' type, no additional fields are required
-            
-            // Add visual feedback for field changes with smooth animations
-            setTimeout(() => {
-                [organizationField, taxField, personalSubtypeField].forEach(field => {
-                    if (field && field.style.display === 'block') {
-                        field.classList.add('animate-in');
-                        // Remove animation class after animation completes
-                        setTimeout(() => field.classList.remove('animate-in'), 400);
-                    }
-                });
-            }, 50);
+  function loadStep(step){
+    var url = window.location.pathname + '?step=' + step + '&load_step=1';
+    fetch(url, {headers: {'X-Requested-With':'XMLHttpRequest'}})
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if(data.form_html){
+          var container = document.getElementById('registrationWizard');
+          container.innerHTML = data.form_html;
+          // Re-bind handlers
+          bindWizard();
         }
+      }).catch(function(e){ console.error('Failed to load step', e); });
+  }
 
-        // Initialize on page load
-        toggleCustomerTypeFields();
-        
-        // Handle changes
-        customerTypeSelect.addEventListener('change', toggleCustomerTypeFields);
+  function bindWizard(){
+    var form = document.getElementById('customerRegistrationForm');
+    if(!form) return;
+    var stepInput = document.getElementById('currentStep');
+    var step = parseInt(stepInput.value || '1', 10);
+
+    // Next for step 1
+    var nextBtn = document.getElementById('nextStepBtn');
+    if(nextBtn){
+      nextBtn.addEventListener('click', function(e){
+        e.preventDefault();
+        // ensure save_only is 0
+        var saveOnly = document.getElementById('saveOnly'); if(saveOnly) saveOnly.value='0';
+        ajaxPostForm(form, function(data){
+          if(data.form_html){ document.getElementById('registrationWizard').innerHTML = data.form_html; bindWizard(); }
+          if(data.redirect_url){ window.location.href = data.redirect_url; }
+        }, function(err){ alert(err); });
+      });
     }
 
-    // Intent selection enhancement
-    const intentCards = document.querySelectorAll('.intent-card');
-    const intentRadios = document.querySelectorAll('input[name="intent"]');
-    
-    if (intentCards.length > 0) {
-        // Add click handlers to cards
-        intentCards.forEach(card => {
-            card.addEventListener('click', function() {
-                const radio = this.querySelector('input[type="radio"]');
-                if (radio) {
-                    radio.checked = true;
-                    updateIntentCardStyles();
-                }
-            });
-        });
-
-        // Add change handlers to radio buttons
-        intentRadios.forEach(radio => {
-            radio.addEventListener('change', updateIntentCardStyles);
-        });
-
-        function updateIntentCardStyles() {
-            intentCards.forEach(card => {
-                const radio = card.querySelector('input[type="radio"]');
-                if (radio && radio.checked) {
-                    card.classList.add('selected');
-                } else {
-                    card.classList.remove('selected');
-                }
-            });
-        }
-
-        // Initialize on page load
-        updateIntentCardStyles();
+    // Save customer quick
+    var saveBtn = document.getElementById('saveCustomerBtn');
+    if(saveBtn){
+      saveBtn.addEventListener('click', function(e){
+        e.preventDefault();
+        var saveOnly = document.getElementById('saveOnly'); if(saveOnly) saveOnly.value='1';
+        ajaxPostForm(form, function(data){
+          if(data.redirect_url){ window.location.href = data.redirect_url; }
+          else if(data.success && data.message){ alert(data.message); }
+        }, function(err){ alert(err); });
+      });
     }
 
-    // Service and Sales card selection
-    const serviceCards = document.querySelectorAll('.service-check-card');
-    const salesCards = document.querySelectorAll('.sales-check-card');
-    
-    function handleCheckCardClick(cards) {
-        cards.forEach(card => {
-            card.addEventListener('click', function() {
-                const checkbox = this.querySelector('input[type="checkbox"]');
-                const radio = this.querySelector('input[type="radio"]');
-                
-                if (checkbox) {
-                    checkbox.checked = !checkbox.checked;
-                } else if (radio) {
-                    radio.checked = true;
-                }
-                
-                updateCheckCardStyles(cards);
-            });
-        });
-    }
-    
-    function updateCheckCardStyles(cards) {
-        cards.forEach(card => {
-            const input = card.querySelector('input[type="checkbox"], input[type="radio"]');
-            if (input && input.checked) {
-                card.classList.add('selected');
-            } else {
-                card.classList.remove('selected');
-            }
-        });
-    }
-    
-    if (serviceCards.length > 0) {
-        handleCheckCardClick(serviceCards);
-        updateCheckCardStyles(serviceCards);
-    }
-    
-    if (salesCards.length > 0) {
-        handleCheckCardClick(salesCards);
-        updateCheckCardStyles(salesCards);
+    // Back buttons
+    var backBtn2 = document.getElementById('backFromStep2');
+    if(backBtn2){ backBtn2.addEventListener('click', function(){ loadStep(1); }); }
+    var backBtn3 = document.getElementById('backFromStep3');
+    if(backBtn3){ backBtn3.addEventListener('click', function(){ loadStep(2); }); }
+    var backBtn4 = document.getElementById('backFromStep4');
+    if(backBtn4){ backBtn4.addEventListener('click', function(){ loadStep(3); }); }
+
+    // Next from step 2
+    var next2 = document.getElementById('nextStep2');
+    if(next2){ next2.addEventListener('click', function(e){ e.preventDefault(); ajaxPostForm(form, function(data){ if(data.form_html){ document.getElementById('registrationWizard').innerHTML = data.form_html; bindWizard(); } if(data.redirect_url){ window.location.href = data.redirect_url; }}, function(err){ alert(err); }); }); }
+
+    // Next from step3
+    var next3 = document.getElementById('nextServiceBtn');
+    if(next3){ next3.addEventListener('click', function(e){ e.preventDefault(); ajaxPostForm(form, function(data){ if(data.form_html){ document.getElementById('registrationWizard').innerHTML = data.form_html; bindWizard(); } if(data.redirect_url){ window.location.href = data.redirect_url; }}, function(err){ alert(err); }); }); }
+
+    // Intent and service selection visual toggles
+    window.selectIntent = function(intentValue){
+      document.querySelectorAll('.intent-card').forEach(function(card){ card.classList.remove('border-primary','bg-light'); });
+      var clicked = event.currentTarget || event.target;
+      if(clicked) clicked.classList.add('border-primary','bg-light');
+      var radio = document.querySelector('input[name="intent"][value="'+intentValue+'"]');
+      if(radio){ radio.checked = true; }
+      var next = document.getElementById('nextStep2'); if(next) next.disabled = false;
+    };
+
+    window.selectServiceType = function(serviceValue){
+      document.querySelectorAll('.service-card').forEach(function(card){ card.classList.remove('border-primary','bg-light'); });
+      var clicked = event.currentTarget || event.target;
+      if(clicked) clicked.classList.add('border-primary','bg-light');
+      var radio = document.querySelector('input[name="service_type"][value="'+serviceValue+'"]');
+      if(radio){ radio.checked = true; }
+      var next = document.getElementById('nextServiceBtn'); if(next) next.disabled = false;
+    };
+
+    // If step4, bind order form interactions similar to order_create
+    if(step === 4){
+      var typeEl = document.querySelector('[name="type"]') || document.getElementById('id_type');
+      function updateSections(){
+        var t = (typeEl && (typeEl.value || (typeEl.options && typeEl.options[typeEl.selectedIndex] && typeEl.options[typeEl.selectedIndex].value))) || '';
+        var s1 = document.getElementById('section-service'); if(s1) s1.style.display = (t==='service')? 'block':'none';
+        var s2 = document.getElementById('section-sales'); if(s2) s2.style.display = (t==='sales')? 'block':'none';
+        var s3 = document.getElementById('section-consultation'); if(s3) s3.style.display = (t==='consultation')? 'block':'none';
+      }
+      if(typeEl){ typeEl.addEventListener('change', updateSections); updateSections(); }
+
+      // Auto-select brand when item changes using data-brands mapping
+      var itemEl = document.getElementById('id_item_name');
+      var brandEl = document.getElementById('id_brand');
+      if(itemEl && brandEl){
+        var mapping = {};
+        try{ mapping = JSON.parse(itemEl.getAttribute('data-brands') || '{}'); }catch(e){ mapping = {}; }
+        itemEl.addEventListener('change', function(){ var bn = mapping[this.value]; if(!bn) return; for(var i=0;i<brandEl.options.length;i++){ if(brandEl.options[i].text === bn || brandEl.options[i].value === bn){ brandEl.selectedIndex = i; break; } } });
+      }
+
+      // Vehicle select enabling when customer vehicles available (not needed here)
     }
 
-    // Dynamic service type loading
-    const serviceTypeRadios = document.querySelectorAll('input[name="service_type"]');
-    const serviceDetails = document.getElementById('service-details');
-    
-    if (serviceTypeRadios.length && serviceDetails) {
-        serviceTypeRadios.forEach(radio => {
-            radio.addEventListener('change', function() {
-                if (this.checked) {
-                    const serviceType = this.value;
-                    fetch(`/service-form/${serviceType}/`)
-                        .then(response => response.text())
-                        .then(html => {
-                            serviceDetails.innerHTML = html;
-                            // Re-initialize any dynamic elements if needed
-                        })
-                        .catch(error => console.error('Error loading service form:', error));
-                }
-            });
-        });
-    }
+  }
 
-    // Form validation + duplicate customer check (Step 1)
-    const form = document.querySelector('form');
-    async function checkDuplicateCustomer() {
-        const nameEl = document.getElementById('id_full_name');
-        const phoneEl = document.getElementById('id_phone');
-        const typeEl = document.getElementById('id_customer_type');
-        const orgEl = document.getElementById('id_organization_name');
-        const taxEl = document.getElementById('id_tax_number');
-        if (!nameEl || !phoneEl) return null;
-        const full_name = (nameEl.value || '').trim();
-        const phone = (phoneEl.value || '').trim();
-        const customer_type = typeEl ? (typeEl.value || '').trim() : '';
-        const organization_name = orgEl ? (orgEl.value || '').trim() : '';
-        const tax_number = taxEl ? (taxEl.value || '').trim() : '';
-        if (!full_name || !phone) return null;
-        const params = new URLSearchParams({ full_name, phone, customer_type, organization_name, tax_number });
-        const res = await fetch(`/api/customers/check-duplicate/?${params.toString()}`, { headers: { 'Accept': 'application/json' }});
-        if (!res.ok) return null;
-        return res.json();
-    }
-
-    function showExistingCustomerModal(data) {
-        const modalEl = document.getElementById('existingCustomerModal');
-        if (!modalEl || !data || !data.customer) return;
-        const c = data.customer;
-        document.getElementById('existingCustomerName').textContent = c.full_name || '';
-        document.getElementById('existingCustomerCode').textContent = c.code || '';
-        document.getElementById('existingCustomerPhone').textContent = c.phone || '';
-        document.getElementById('existingCustomerType').textContent = (c.customer_type || 'personal');
-        document.getElementById('existingCustomerOrg').textContent = c.organization_name || '-';
-        document.getElementById('existingCustomerTax').textContent = c.tax_number || '-';
-        document.getElementById('existingCustomerEmail').textContent = c.email || '-';
-        document.getElementById('existingCustomerVisits').textContent = c.total_visits != null ? c.total_visits : '-';
-        document.getElementById('existingCustomerAddress').textContent = c.address || '-';
-        const orderBtn = document.getElementById('existingCustomerCreateOrderBtn');
-        const viewBtn = document.getElementById('existingCustomerViewBtn');
-        if (orderBtn) orderBtn.setAttribute('href', c.create_order_url);
-        if (viewBtn) viewBtn.setAttribute('href', c.detail_url);
-        const bsModal = new bootstrap.Modal(modalEl);
-        bsModal.show();
-    }
-
-    if (form) {
-        form.addEventListener('submit', async function(e) {
-            let isValid = true;
-            const requiredFields = form.querySelectorAll('[required]');
-            requiredFields.forEach(field => {
-                if (!field.value.trim()) {
-                    field.classList.add('is-invalid');
-                    isValid = false;
-                } else {
-                    field.classList.remove('is-invalid');
-                }
-            });
-            if (!isValid) {
-                e.preventDefault();
-                const firstInvalid = form.querySelector('.is-invalid');
-                if (firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                return;
-            }
-            const stepInput = form.querySelector('input[name="step"]');
-            const currentStep = stepInput ? parseInt(stepInput.value, 10) : null;
-            if (currentStep === 1) {
-                e.preventDefault();
-                const result = await checkDuplicateCustomer();
-                if (result && result.exists) {
-                    showExistingCustomerModal(result);
-                    return;
-                }
-                // Re-submit with original submitter preserved
-                const submitter = e.submitter;
-                if (submitter && submitter.name) {
-                    const hidden = document.createElement('input');
-                    hidden.type = 'hidden';
-                    hidden.name = submitter.name;
-                    hidden.value = submitter.value;
-                    form.appendChild(hidden);
-                }
-                form.submit();
-            }
-        });
-    }
-
-    // Auto-save form data
-    function saveFormData() {
-        if (!form) return;
-        
-        const formData = new FormData(form);
-        const formObject = {};
-        formData.forEach((value, key) => {
-            formObject[key] = value;
-        });
-        
-        localStorage.setItem('customerRegistrationData', JSON.stringify(formObject));
-    }
-
-    // Load saved form data
-    function loadFormData() {
-        const savedData = localStorage.getItem('customerRegistrationData');
-        if (!savedData) return;
-        
-        try {
-            const formData = JSON.parse(savedData);
-            Object.keys(formData).forEach(key => {
-                const element = form.querySelector(`[name="${key}"]`);
-                if (element) {
-                    if (element.type === 'checkbox' || element.type === 'radio') {
-                        element.checked = formData[key] === 'true' || formData[key] === element.value;
-                    } else {
-                        element.value = formData[key];
-                    }
-                }
-            });
-        } catch (e) {
-            console.error('Error loading form data:', e);
-            localStorage.removeItem('customerRegistrationData');
-        }
-    }
-
-    // Set up auto-save
-    if (form) {
-        // Load saved data on page load
-        loadFormData();
-        
-        // Save on input change
-        form.addEventListener('input', saveFormData);
-        
-        // Clear saved data on successful form submission
-        form.addEventListener('submit', function() {
-            localStorage.removeItem('customerRegistrationData');
-        });
-    }
-
-    // Initialize tooltips
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-});
+  // Initialize on DOM ready
+  document.addEventListener('DOMContentLoaded', function(){ bindWizard(); });
+})();
