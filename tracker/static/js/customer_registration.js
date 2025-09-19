@@ -5,8 +5,28 @@
     var xhr = new XMLHttpRequest();
     xhr.open('POST', window.location.href);
     xhr.setRequestHeader('X-Requested-With','XMLHttpRequest');
+
+    // Set CSRF token header from cookie for Django
+    function getCookie(name){
+      var cookieValue = null;
+      if (document.cookie && document.cookie !== ''){
+        var cookies = document.cookie.split(';');
+        for (var i=0;i<cookies.length;i++){
+          var cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length+1) === (name + '=')){
+            cookieValue = decodeURIComponent(cookie.substring(name.length+1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+    var csrftoken = getCookie('csrftoken');
+    if(csrftoken){ try{ xhr.setRequestHeader('X-CSRFToken', csrftoken); }catch(e){} }
+
     xhr.onreadystatechange = function(){
       if(xhr.readyState !== 4) return;
+      console.debug('Customer reg AJAX response', xhr.status, xhr.responseText.slice(0,200));
       if(xhr.status >=200 && xhr.status < 300){
         try{
           var data = JSON.parse(xhr.responseText);
@@ -17,7 +37,7 @@
         if(data.redirect_url){ window.location.href = data.redirect_url; return; }
         if(onSuccess) onSuccess(data);
       }else{
-        if(onError) onError('Server error');
+        if(onError) onError('Server error: ' + xhr.status);
       }
     };
     xhr.send(formData);
