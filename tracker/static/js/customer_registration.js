@@ -142,7 +142,7 @@
 
     // Next from step3
     var next3 = document.getElementById('nextServiceBtn');
-    if(next3){ next3.addEventListener('click', function(e){ e.preventDefault(); ajaxPostForm(form, function(data){ var cur = parseInt((document.getElementById('currentStep')||{value:3}).value||3,10); var next = Math.min(cur+1,4); loadStep(next); }, function(err){ alert(err); }); }); }
+    if(next3){ next3.addEventListener('click', function(e){ e.preventDefault(); ajaxPostForm(form, function(data){ try{ if(data && data.form_html && (!data.success)){ document.getElementById('registrationWizard').innerHTML = data.form_html; bindWizard(); return; } if(data && data.form_html && data.success){ document.getElementById('registrationWizard').innerHTML = data.form_html; bindWizard(); return; } var cur = parseInt((document.getElementById('currentStep')||{value:3}).value||3,10); var next = Math.min(cur+1,4); loadStep(next); }catch(err){ console.error('Error handling step3 response', err); } }, function(err){ console.error('AJAX error', err); alert('Request failed: ' + err); }); }); }
 
     // Intent and service selection visual toggles
     window.selectIntent = function(intentValue){
