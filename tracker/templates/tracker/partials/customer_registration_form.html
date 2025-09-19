@@ -207,6 +207,39 @@
                 </div>
 
                 <div id="section-sales" class="{% if order_form.initial.type and order_form.initial.type != 'sales' %}d-none{% endif %}">
+                  <div class="card border-warning mb-3">
+                    <div class="card-header bg-warning text-dark">
+                      <h6 class="mb-0"><i class="fa fa-list-check me-2"></i>Tire Service Add-ons</h6>
+                    </div>
+                    <div class="card-body">
+                      <div class="row g-3">
+                        <div class="col-md-3">
+                          <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="oc_ts_install" name="tire_services" value="install">
+                            <label class="form-check-label" for="oc_ts_install">Install Tires</label>
+                          </div>
+                        </div>
+                        <div class="col-md-3">
+                          <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="oc_ts_balance" name="tire_services" value="balancing">
+                            <label class="form-check-label" for="oc_ts_balance">Wheel Balancing</label>
+                          </div>
+                        </div>
+                        <div class="col-md-3">
+                          <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="oc_ts_align" name="tire_services" value="alignment">
+                            <label class="form-check-label" for="oc_ts_align">Wheel Alignment</label>
+                          </div>
+                        </div>
+                        <div class="col-md-3">
+                          <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="oc_ts_dispose" name="tire_services" value="disposal">
+                            <label class="form-check-label" for="oc_ts_dispose">Old Tire Disposal</label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                   <div class="row g-3">
                     <div class="col-md-6">
                       <label class="form-label">Item</label>
