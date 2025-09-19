@@ -58,7 +58,9 @@
   }
 
   function bindWizard(){
+    console.debug('bindWizard: called');
     var form = document.getElementById('customerRegistrationForm');
+    if(!form){ console.debug('bindWizard: no form (customerRegistrationForm) found'); }
     // Update progress UI helper
     function updateProgress(){
       var stepInput = document.getElementById('currentStep');
