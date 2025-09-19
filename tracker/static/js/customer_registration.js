@@ -93,8 +93,10 @@
         // ensure save_only is 0
         var saveOnly = document.getElementById('saveOnly'); if(saveOnly) saveOnly.value='0';
         ajaxPostForm(form, function(data){
-          if(data.form_html){ document.getElementById('registrationWizard').innerHTML = data.form_html; bindWizard(); }
-          if(data.redirect_url){ window.location.href = data.redirect_url; }
+          // On success, request the next step explicitly to ensure we get step+1
+          var cur = parseInt((document.getElementById('currentStep')||{value:1}).value||1,10);
+          var next = Math.min(cur+1,4);
+          loadStep(next);
         }, function(err){ alert(err); });
       });
     }
