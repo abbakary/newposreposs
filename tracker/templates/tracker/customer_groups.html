@@ -773,6 +773,32 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <script>
+  // AJAX loader for individual group detail - loads partial and replaces group list
+  (function(){
+    document.addEventListener('DOMContentLoaded', function(){
+      // Delegate clicks for view details buttons inside group cards
+      document.querySelectorAll('.group-card a.btn-sm.btn-primary').forEach(function(btn){
+        btn.addEventListener('click', function(e){
+          e.preventDefault();
+          var href = btn.getAttribute('href');
+          if(!href) return;
+          try{
+            var params = new URL(href, window.location.origin).searchParams;
+            var group = params.get('group');
+            if(!group) return;
+            var url = window.location.pathname + '?group=' + encodeURIComponent(group) + '&load_group=1';
+            fetch(url, {headers: {'X-Requested-With':'XMLHttpRequest'}})
+              .then(function(r){ return r.json(); })
+              .then(function(data){
+                if(data && data.html){
+                  var container = document.getElementById('groupList');
+                  if(container){ container.innerHTML = data.html; }
+                }
+              }).catch(function(err){ console.error('Failed to load group detail', err); });
+          }catch(err){ console.error('Invalid URL', err); }
+        });
+      });
+    });
   (function(){
     document.addEventListener('DOMContentLoaded', function(){
       var el = document.getElementById('monthly-trend-chart');
