@@ -283,6 +283,8 @@
     if(saveBtn){
       saveBtn.addEventListener('click', function(e){
         e.preventDefault();
+        // If AJAX handler is present, let it handle submission
+        if(window.__CUSTOMER_REG_AJAX){ return; }
         var saveOnly = document.getElementById('saveOnly');
         if(saveOnly) saveOnly.value = '1';
         var form = document.getElementById('customerRegistrationForm');
