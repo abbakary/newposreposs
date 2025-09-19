@@ -89,32 +89,36 @@
 
     // Next for step 1
     var nextBtn = document.getElementById('nextStepBtn');
+    console.debug('bindWizard: nextBtn=', !!nextBtn);
     if(nextBtn){
-      nextBtn.addEventListener('click', function(e){
-        e.preventDefault();
-        try{
-          // ensure save_only is 0
-          var saveOnly = document.getElementById('saveOnly'); if(saveOnly) saveOnly.value='0';
-          ajaxPostForm(form, function(data){
-            try{
-              // If server returned form_html with errors, render it
-              if(data && data.form_html && (!data.success)){
-                document.getElementById('registrationWizard').innerHTML = data.form_html; bindWizard();
-                return;
-              }
-              // If server returned form_html for the next step, render it
-              if(data && data.form_html && data.success){
-                document.getElementById('registrationWizard').innerHTML = data.form_html; bindWizard();
-                return;
-              }
-              // Otherwise explicitly load next step
-              var cur = parseInt((document.getElementById('currentStep')||{value:1}).value||1,10);
-              var next = Math.min(cur+1,4);
-              loadStep(next);
-            }catch(err){ console.error('Error handling next response', err); }
-          }, function(err){ console.error('AJAX error', err); alert('Request failed: ' + err); });
-        }catch(err){ console.error('Next click handler error', err); }
-      });
+      if(!nextBtn.dataset.bound){
+        nextBtn.dataset.bound = '1';
+        nextBtn.addEventListener('click', function(e){
+          e.preventDefault();
+          try{
+            // ensure save_only is 0
+            var saveOnly = document.getElementById('saveOnly'); if(saveOnly) saveOnly.value='0';
+            ajaxPostForm(form, function(data){
+              try{
+                // If server returned form_html with errors, render it
+                if(data && data.form_html && (!data.success)){
+                  document.getElementById('registrationWizard').innerHTML = data.form_html; bindWizard();
+                  return;
+                }
+                // If server returned form_html for the next step, render it
+                if(data && data.form_html && data.success){
+                  document.getElementById('registrationWizard').innerHTML = data.form_html; bindWizard();
+                  return;
+                }
+                // Otherwise explicitly load next step
+                var cur = parseInt((document.getElementById('currentStep')||{value:1}).value||1,10);
+                var next = Math.min(cur+1,4);
+                loadStep(next);
+              }catch(err){ console.error('Error handling next response', err); }
+            }, function(err){ console.error('AJAX error', err); alert('Request failed: ' + err); });
+          }catch(err){ console.error('Next click handler error', err); }
+        });
+      }
     }
 
     // Save customer quick
