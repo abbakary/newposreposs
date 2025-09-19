@@ -27,9 +27,21 @@
     <div class="row justify-content-center">
       <div class="col-xl-10">
         <div class="card">
-          <div class="card-header d-flex align-items-center justify-content-between">
-            <h5 class="mb-0">Step {{ step }} of 4</h5>
-         
+          <div class="card-header d-flex align-items-center justify-content-between flex-column flex-md-row">
+            <div class="d-flex align-items-center w-100">
+              <h5 class="mb-0 me-3">Step <span id="currentStepDisplay">{{ step }}</span> of 4</h5>
+              <div class="progress w-100" style="height:10px;">
+                <div id="registrationProgressBar" class="progress-bar" role="progressbar" style="width:0%;" aria-valuenow="{{ step }}" aria-valuemin="0" aria-valuemax="4"></div>
+              </div>
+            </div>
+            <div class="mt-2 mt-md-0">
+              <ul id="registrationSteps" class="list-inline mb-0">
+                <li class="list-inline-item px-2"><span class="badge bg-secondary step-indicator {% if step == 1 %}bg-primary{% endif %}">1</span></li>
+                <li class="list-inline-item px-2"><span class="badge bg-secondary step-indicator {% if step == 2 %}bg-primary{% endif %}">2</span></li>
+                <li class="list-inline-item px-2"><span class="badge bg-secondary step-indicator {% if step == 3 %}bg-primary{% endif %}">3</span></li>
+                <li class="list-inline-item px-2"><span class="badge bg-secondary step-indicator {% if step == 4 %}bg-primary{% endif %}">4</span></li>
+              </ul>
+            </div>
           </div>
           <div class="card-body" id="registrationWizard">
             {# Initial render of the wizard content via partial so subsequent AJAX updates can reuse the same markup #}
