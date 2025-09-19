@@ -1390,8 +1390,13 @@ def customer_groups(request: HttpRequest):
     
     # If it's an AJAX request, return JSON response
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        # If frontend requested to load a single group's detail HTML, return rendered partial
+        if request.GET.get('load_group') == '1' and selected_group and selected_group != 'all':
+            html = render_to_string('tracker/partials/customer_group_detail.html', context, request=request)
+            return JsonResponse({'success': True, 'html': html})
+
         from django.core import serializers
-        
+
         # Convert the context to a JSON-serializable format
         response_data = {
             'customer_groups': customer_groups,
